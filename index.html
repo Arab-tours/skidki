@@ -352,8 +352,8 @@ async function initData(){
 /* ============ ЗАКАЗАТЬ ОХОТУ ============ */
 let HUNTS=[];
 async function loadHunts(){
-  try{const r=await fetch(`https://api.github.com/repos/${REPO}/issues?labels=hunt&state=all&per_page=50`);if(!r.ok)throw 0;
-    const j=await r.json();HUNTS=j.filter(i=>!i.pull_request).map(i=>{const labels=(i.labels||[]).map(l=>l.name);
+  try{const r=await fetch(`https://api.github.com/repos/${REPO}/issues?state=all&per_page=50`);if(!r.ok)throw 0;
+    const j=await r.json();HUNTS=j.filter(i=>!i.pull_request&&/^Охота:/.test(i.title)).map(i=>{const labels=(i.labels||[]).map(l=>l.name);
       return {title:i.title,url:i.html_url,state:labels.includes("found")?"done":labels.includes("nothing")?"none":i.state==="closed"?"done":"queued",created:i.created_at}})}
   catch(e){HUNTS=null}
   renderHunt();
