@@ -5,6 +5,22 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="description" content="Брендовая одежда со скидкой: реальные объявления с российских площадок, фильтр брендов и сравнение с медианой цены.">
 <title>Охота за скидками</title>
+<meta name="theme-color" content="#14163A">
+<link rel="icon" type="image/png" sizes="32x32" href="icon-32.png">
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Охота за скидками">
+<meta property="og:title" content="Охота за скидками">
+<meta property="og:description" content="Брендовые вещи дешевле рынка. Каждая находка сравнивается с медианой цены.">
+<meta property="og:url" content="https://arab-tours.github.io/skidki/">
+<meta property="og:image" content="https://arab-tours.github.io/skidki/cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="Охота за скидками: ценники с находками — 'S Max Mara за 23 000 ₽, Canada Goose за 21 500 ₽, Prada за 22 000 ₽">
+<meta property="og:locale" content="ru_RU">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://arab-tours.github.io/skidki/cover.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
 <style>
@@ -104,6 +120,34 @@ ul.clean{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
 .cal .when{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:500}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;z-index:20;max-width:calc(100% - 32px)}
 .small{font-size:12px;color:var(--muted)}
+/* обложка: один тёмный мир в обеих темах */
+.hero{--h-ground:#14163A;--h-fg:#FFFFFF;--h-sub:#C9CCE4;--h-dim:#A9ADCB;--h-tag:#FFFFFF;--h-ink:#16182A;--h-mute:#5B5F78;--h-strike:#8A8EA8;--h-ok:#1E8A55;
+  position:relative;overflow:hidden;background:var(--h-ground);color:var(--h-fg);border-radius:18px;padding:28px;display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;align-items:center;isolation:isolate}
+.hero::before,.hero::after{content:"";position:absolute;border-radius:50%;border:1px solid rgba(255,255,255,.07);z-index:-1}
+.hero::before{width:520px;height:520px;right:-160px;top:-220px}.hero::after{width:380px;height:380px;right:-90px;top:-150px}
+.hero-copy{display:flex;flex-direction:column;gap:14px;min-width:0}
+.hero-eyebrow{display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--h-dim)}
+.hero-eyebrow i{width:30px;height:19px;background:var(--tag);clip-path:polygon(7px 0,100% 0,100% 100%,7px 100%,0 50%);position:relative;flex:none}
+.hero-eyebrow i::after{content:"";position:absolute;left:8px;top:7px;width:5px;height:5px;border-radius:50%;background:var(--h-ground)}
+.hero h2{font-family:var(--display);font-weight:800;font-size:clamp(30px,5.4vw,50px);line-height:1;letter-spacing:-.04em;color:var(--h-fg);margin:0}
+.hero p{margin:0;color:var(--h-sub);font-size:16px;line-height:1.45;max-width:44ch}
+.hero-cta{display:flex;gap:8px;flex-wrap:wrap}
+.hero-cta a{display:inline-flex;align-items:center;min-height:44px;padding:0 16px;border-radius:12px;font-weight:700;font-size:14px;text-decoration:none;transition:transform 160ms cubic-bezier(.23,1,.32,1)}
+.hero-cta a:active{transform:scale(.97)}
+.hero-cta .p{background:var(--tag);color:var(--tag-fg)}.hero-cta .s{border:1px solid rgba(255,255,255,.2);color:var(--h-fg)}
+.hero-tags{position:relative;height:292px;min-width:0}
+.htag{position:absolute;left:0;right:0;height:96px;background:var(--h-tag);color:var(--h-ink);clip-path:polygon(26px 0,100% 0,100% 100%,26px 100%,0 50%);border-radius:5px;padding:12px 16px 12px 44px;box-sizing:border-box;display:flex;flex-direction:column;justify-content:space-between;text-decoration:none;transform-origin:left center}
+.htag::before{content:"";position:absolute;left:15px;top:42px;width:11px;height:11px;border-radius:50%;background:var(--h-ground)}
+.htag b{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--h-mute);display:flex;justify-content:space-between;gap:8px;font-weight:700}
+.htag b em{font-style:normal;color:var(--h-ok);font-family:var(--body);letter-spacing:0;text-transform:none}
+.htag span{font-family:var(--mono);font-size:24px;font-weight:500;font-variant-numeric:tabular-nums;white-space:nowrap}
+.htag s{font-size:13px;color:var(--h-strike);margin-left:8px}
+.htag:nth-child(1){top:0;transform:rotate(4deg);margin-left:22px}.htag:nth-child(2){top:98px;transform:rotate(-3deg)}.htag:nth-child(3){top:192px;transform:rotate(2deg);margin-left:16px}
+.hbadge{position:absolute;right:-4px;top:150px;width:92px;height:92px;border-radius:50%;background:var(--tag);color:var(--tag-fg);display:flex;flex-direction:column;align-items:center;justify-content:center;transform:rotate(-10deg);font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.04em;line-height:1}
+.hbadge small{font-family:var(--body);font-size:10px;font-weight:700;letter-spacing:0;margin-top:3px}
+@media (hover:hover) and (pointer:fine){.htag{transition:transform 200ms cubic-bezier(.23,1,.32,1)}.htag:hover{transform:rotate(0deg) translateX(-4px)}}
+@media (max-width:640px){.hero{grid-template-columns:1fr;padding:22px}.hero-tags{height:292px}}
+@media (prefers-reduced-motion:reduce){.htag,.hero-cta a{transition:none}}
 .more{align-self:center}
 @media (max-width:560px){.deal{grid-template-columns:96px 1fr}.deal .acts{grid-column:1/-1}.deal .acts .go{flex:1;justify-content:center}}
 @media (max-width:480px){.row{grid-template-columns:1fr}.go{justify-content:center}.cal .row{grid-template-columns:1fr}}
@@ -132,7 +176,20 @@ ul.clean{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
 
 <!-- НАХОДКИ -->
 <section data-view="deals">
-  <p class="lead" id="dealsLead">Реальные объявления, собранные с площадок и обновляемые каждый день. Каждое сравнивается с медианой цены той же вещи того же бренда, так видно, что действительно дёшево.</p>
+  <div class="hero">
+    <div class="hero-copy">
+      <div class="hero-eyebrow"><i aria-hidden="true"></i>Oskelly · ЦУМ · Авито · ещё 27 площадок</div>
+      <h2>Охота<br>за скидками</h2>
+      <p>Брендовые вещи дешевле рынка. Каждая находка сравнивается с медианой цены той же вещи того же бренда.</p>
+      <div class="hero-cta"><a class="p" href="#dList">Смотреть находки</a><a class="s" href="#hunt">Заказать охоту</a></div>
+    </div>
+    <div class="hero-tags" aria-label="Примеры находок">
+      <a class="htag" target="_blank" rel="noopener" href="https://oskelly.ru/products/palto-s-max-mara-pre-owned-6640706"><b>'S Max Mara · пальто <em>б/у · EU 40</em></b><span>23 000 ₽<s>98 000</s></span></a>
+      <a class="htag" target="_blank" rel="noopener" href="https://oskelly.ru/products/pukhovik-canada-goose-pre-owned-2670122"><b>Canada Goose · пуховик <em>б/у · XS</em></b><span>21 500 ₽<s>120 000</s></span></a>
+      <a class="htag" target="_blank" rel="noopener" href="https://oskelly.ru/products/nizkie-krossovki--kedy-prada-pre-owned-6716698"><b>Prada · кроссовки <em>б/у · EU 41,5</em></b><span>22 000 ₽<s>68 000</s></span></a>
+      <div class="hbadge" aria-hidden="true">−82%<small>от старой цены</small></div>
+    </div>
+  </div>
   <div class="stats" id="stats"></div>
   <div class="panel">
     <div class="field"><span class="label">Бренды</span><div class="chips" id="dBrand"></div></div>
@@ -472,6 +529,7 @@ function route(){const v=(location.hash||"#deals").slice(1);const ok=VIEWS.inclu
   document.querySelectorAll("#nav a").forEach(a=>{if(a.getAttribute("href")==="#"+ok)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
   if(ok==="saved")renderSaved();window.scrollTo(0,0)}
 addEventListener("hashchange",route);
+document.querySelector('.hero-cta .p').addEventListener("click",e=>{e.preventDefault();$("dTitle").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"})});
 renderDealFilters();renderDeals();update();route();
 initData();
 </script>
