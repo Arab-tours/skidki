@@ -1,0 +1,479 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Брендовая одежда со скидкой: реальные объявления с российских площадок, фильтр брендов и сравнение с медианой цены.">
+<title>Охота за скидками</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: sticky header + tabbed single column; each deal is a price tag row (price block left, details, action) */
+:root{
+  --bg:#F3F4F8; --surface:#FFFFFF; --sunk:#E8EAF2; --fg:#16182A; --muted:#5B5F78; --line:#D6D9E6;
+  --accent:#3438C9; --accent-fg:#FFFFFF; --tag:#F2CE3A; --tag-fg:#1E1A05; --ok:#1E8A55; --warn:#B4541A;
+  --display:"Unbounded","Manrope",system-ui,sans-serif; --body:"Manrope",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#10111C; --surface:#191B2B; --sunk:#22253A; --fg:#ECEDF7; --muted:#A2A6C2; --line:#2F3350;
+  --accent:#8C90FF; --accent-fg:#10111C; --tag:#E8C53A; --tag-fg:#1E1A05; --ok:#4CC98A; --warn:#F09A5E; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#10111C; --surface:#191B2B; --sunk:#22253A; --fg:#ECEDF7; --muted:#A2A6C2; --line:#2F3350;
+  --accent:#8C90FF; --accent-fg:#10111C; --tag:#E8C53A; --tag-fg:#1E1A05; --ok:#4CC98A; --warn:#F09A5E; color-scheme:dark}
+*{box-sizing:border-box}
+html{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+.wrap{max-width:880px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:12px 8px}
+h1{font-family:var(--display);font-size:19px;font-weight:700;margin:0;letter-spacing:-.01em;display:flex;align-items:center;gap:10px}
+h1 .hole{width:22px;height:14px;background:var(--tag);border-radius:3px 7px 7px 3px;position:relative;flex:none}
+h1 .hole::after{content:"";position:absolute;left:4px;top:5px;width:4px;height:4px;border-radius:50%;background:var(--surface)}
+.count{font-family:var(--mono);font-size:12px;color:var(--muted);text-align:right}
+nav{display:flex;gap:4px;overflow-x:auto;padding-block:0 10px;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav a{flex:none;text-decoration:none;color:var(--muted);font-weight:600;font-size:14px;padding:7px 13px;border-radius:999px}
+nav a[aria-current="page"]{background:var(--fg);color:var(--bg)}
+main{padding-block:18px 48px}
+section[data-view]{display:flex;flex-direction:column;gap:16px}
+h2{font-family:var(--display);font-weight:500;font-size:16px;margin:0;text-wrap:balance}
+.lead{color:var(--muted);margin:0;max-width:64ch}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:14px}
+.searchrow{display:flex;gap:8px;flex-wrap:wrap}
+.searchrow input{flex:1 1 220px;min-width:0}
+input,select,textarea{font:inherit;color:var(--fg);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;width:100%}
+textarea{min-height:110px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button{font:inherit;font-weight:600;border:0;border-radius:10px;padding:10px 14px;cursor:pointer;background:var(--sunk);color:var(--fg)}
+button.primary{background:var(--accent);color:var(--accent-fg)}
+button.ghost{background:transparent;border:1px solid var(--line)}
+button:disabled{opacity:.55;cursor:progress}
+.label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.field{display:flex;flex-direction:column;gap:6px;min-width:0}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--bg);border:1px solid var(--line);color:var(--fg);font-weight:500;font-size:13px;padding:6px 11px;border-radius:999px}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+.chip small{font-family:var(--mono);opacity:.7;margin-left:4px}
+details summary{cursor:pointer;font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details summary::-webkit-details-marker{display:none}
+details summary::after{content:"+";font-family:var(--mono);color:var(--muted)}
+details[open] summary::after{content:"–"}
+.filters{display:flex;flex-direction:column;gap:14px;margin-top:14px}
+.qline{font-family:var(--mono);font-size:13px;background:var(--sunk);border-radius:8px;padding:8px 10px;overflow-wrap:anywhere}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.list{display:flex;flex-direction:column;gap:8px}
+.row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.row .name{font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.row .note{color:var(--muted);font-size:13px}
+.row .meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--sunk);color:var(--muted);white-space:nowrap}
+.badge.native,.badge.hot{background:var(--tag);color:var(--tag-fg)}
+.badge.okb{background:transparent;border:1px solid var(--ok);color:var(--ok)}
+.badge.warnb{background:transparent;border:1px solid var(--warn);color:var(--warn)}
+.go{display:inline-flex;align-items:center;gap:6px;text-decoration:none;background:var(--accent);color:var(--accent-fg);font-weight:700;font-size:14px;padding:9px 14px;border-radius:10px;white-space:nowrap}
+.star{background:none;padding:4px;font-size:18px;line-height:1;color:var(--muted)}
+.star[aria-pressed="true"]{color:var(--tag)}
+.empty{color:var(--muted);text-align:center;padding:28px 12px;border:1px dashed var(--line);border-radius:12px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;gap:6px;align-items:center}
+/* deal tag */
+.deal{display:grid;grid-template-columns:118px 1fr auto;gap:14px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.pricebox{display:flex;flex-direction:column;gap:2px;font-variant-numeric:tabular-nums}
+.pricebox .now{font-family:var(--mono);font-size:17px;font-weight:500}
+.pricebox .was{font-family:var(--mono);font-size:12px;color:var(--muted);text-decoration:line-through}
+.pricebox .off{align-self:flex-start;font-size:12px;font-weight:700;background:var(--tag);color:var(--tag-fg);padding:1px 7px;border-radius:4px 10px 10px 4px}
+.deal .info{min-width:0;display:flex;flex-direction:column;gap:3px}
+.deal .ttl{font-weight:700}
+.deal .sub{font-size:13px;color:var(--muted)}
+.deal .acts{display:flex;gap:6px;align-items:center}
+.heart{background:none;border:1px solid var(--line);padding:8px 10px;font-size:15px;line-height:1;color:var(--muted)}
+.heart[aria-pressed="true"]{color:var(--warn);border-color:var(--warn)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stat b{display:block;font-family:var(--mono);font-size:16px;font-weight:500;font-variant-numeric:tabular-nums}
+.stat span{font-size:12px;color:var(--muted)}
+.verdict{display:flex;flex-direction:column;gap:10px}
+.score{font-family:var(--display);font-size:34px;font-weight:700;font-variant-numeric:tabular-nums}
+.ok{color:var(--ok)} .warn{color:var(--warn)}
+ul.clean{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:4px}
+.price{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.cal{display:flex;flex-direction:column;gap:8px}
+.cal .row{grid-template-columns:110px 1fr}
+.cal .when{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:500}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--fg);color:var(--bg);padding:10px 16px;border-radius:10px;font-weight:600;z-index:20;max-width:calc(100% - 32px)}
+.small{font-size:12px;color:var(--muted)}
+.more{align-self:center}
+@media (max-width:560px){.deal{grid-template-columns:96px 1fr}.deal .acts{grid-column:1/-1}.deal .acts .go{flex:1;justify-content:center}}
+@media (max-width:480px){.row{grid-template-columns:1fr}.go{justify-content:center}.cal .row{grid-template-columns:1fr}}
+@media (prefers-reduced-motion:no-preference){.go,.chip,button{transition:filter .15s}.go:hover,button:hover{filter:brightness(1.08)}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="head">
+      <h1><span class="hole" aria-hidden="true"></span>Охота за скидками</h1>
+      <span class="count" id="count">загружаю…</span>
+    </div>
+    <nav id="nav">
+      <a href="#deals">Находки</a>
+      <a href="#hunt">Заказать охоту</a>
+      <a href="#search">Поиск по площадкам</a>
+      <a href="#saved">Избранное</a>
+      <a href="#calendar">Распродажи</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+<!-- НАХОДКИ -->
+<section data-view="deals">
+  <p class="lead" id="dealsLead">Реальные объявления, собранные с площадок и обновляемые каждый день. Каждое сравнивается с медианой цены той же вещи того же бренда, так видно, что действительно дёшево.</p>
+  <div class="stats" id="stats"></div>
+  <div class="panel">
+    <div class="field"><span class="label">Бренды</span><div class="chips" id="dBrand"></div></div>
+    <details id="dMore" open>
+      <summary>Ещё фильтры</summary>
+      <div class="filters">
+        <div class="field"><span class="label">Раздел</span><div class="chips" id="dCat"></div></div>
+        <div class="field"><span class="label">Для кого</span><div class="chips" id="dGender"></div></div>
+        <div class="grid">
+          <div class="field"><label class="label" for="dSize">Размер</label><input id="dSize" placeholder="M, L, IT 48, 42"></div>
+          <div class="field"><label class="label" for="dMin">Цена от, ₽</label><input id="dMin" inputmode="numeric" placeholder="0"></div>
+          <div class="field"><label class="label" for="dMax">Цена до, ₽</label><input id="dMax" inputmode="numeric" placeholder="без лимита"></div>
+          <div class="field"><label class="label" for="dOff">Скидка не меньше</label>
+            <select id="dOff"><option value="0">Любая</option><option value="20">20%</option><option value="40">40%</option><option value="60">60%</option></select></div>
+          <div class="field"><label class="label" for="dCond">Состояние</label>
+            <select id="dCond"><option value="any">Любое</option><option value="new">Новое</option><option value="used">Б/у</option></select></div>
+          <div class="field"><label class="label" for="dSort">Сортировка</label>
+            <select id="dSort"><option value="value">Ниже медианы сильнее всего</option><option value="off">Самая большая скидка</option><option value="price">Сначала дешевле</option><option value="pricedesc">Сначала дороже</option></select></div>
+        </div>
+      </div>
+    </details>
+  </div>
+  <div class="toolbar"><h2 id="dTitle">Находки</h2><button class="ghost" id="dReset">Сбросить фильтры</button></div>
+  <div class="list" id="dList"></div>
+  <button class="ghost more" id="dMoreBtn" hidden>Показать ещё</button>
+  <p class="small">Цены и наличие проверены на дату сбора, указанную у каждой находки. Хорошие вещи продаются быстро, открывай объявление, чтобы увидеть актуальное состояние.</p>
+</section>
+
+<!-- ЗАКАЗАТЬ ОХОТУ -->
+<section data-view="hunt" hidden>
+  <h2>Заказать охоту</h2>
+  <p class="lead">Опиши, что нужно. Раз в день площадки просматриваются по заявкам, найденное добавляется в «Находки».</p>
+  <div class="panel">
+    <div class="grid">
+      <div class="field"><label class="label" for="hBrand">Бренд</label><input id="hBrand" list="brandList" placeholder="Stone Island"></div>
+      <div class="field"><label class="label" for="hWhat">Что ищем</label><input id="hWhat" placeholder="куртка, кроссовки, сумка"></div>
+      <div class="field"><label class="label" for="hGender">Для кого</label><select id="hGender"><option value="m">Мужское</option><option value="w">Женское</option><option value="k">Детское</option></select></div>
+      <div class="field"><label class="label" for="hSize">Размер</label><input id="hSize" placeholder="L, 43"></div>
+      <div class="field"><label class="label" for="hMax">Бюджет до, ₽</label><input id="hMax" inputmode="numeric" placeholder="50000"></div>
+      <div class="field"><label class="label" for="hCond">Состояние</label><select id="hCond"><option value="any">Любое</option><option value="new">Новое</option><option value="used">Б/у ок</option></select></div>
+    </div>
+    <button class="primary" id="hAdd">Отправить заявку</button>
+    <p class="small" id="hState"></p>
+  </div>
+  <h2>Мои заявки</h2>
+  <div class="list" id="hList"></div>
+</section>
+
+<!-- ПОИСК ПО ПЛОЩАДКАМ -->
+<section data-view="search" hidden>
+  <p class="lead">Быстрый переход в выдачу 30 площадок с твоими фильтрами, если хочешь посмотреть сам.</p>
+  <div class="panel">
+    <div class="searchrow">
+      <input id="q" type="search" placeholder="пуховик, тренч, кроссовки 990" value="пуховик">
+    </div>
+    <details id="filtersBox" open>
+      <summary>Фильтры</summary>
+      <div class="filters">
+        <div class="field"><span class="label">Бренд</span><div class="chips" id="fBrand"></div></div>
+        <div class="field"><span class="label">Раздел</span><div class="chips" id="fCat"></div></div>
+        <div class="field"><span class="label">Для кого</span><div class="chips" id="fGender"></div></div>
+        <div class="field"><span class="label">Тип площадки</span><div class="chips" id="fType"></div></div>
+        <div class="grid">
+          <div class="field"><label class="label" for="brand">Другой бренд</label><input id="brand" list="brandList" placeholder="Любой"></div>
+          <div class="field"><label class="label" for="size">Размер</label><input id="size" placeholder="M, 42"></div>
+          <div class="field"><label class="label" for="pmin">Цена от, ₽</label><input id="pmin" inputmode="numeric" placeholder="0"></div>
+          <div class="field"><label class="label" for="pmax">Цена до, ₽</label><input id="pmax" inputmode="numeric" placeholder="без лимита"></div>
+          <div class="field"><label class="label" for="sort">Сортировка</label>
+            <select id="sort"><option value="price">Сначала дешевле</option><option value="discount">Самая большая скидка</option><option value="popular">По популярности</option><option value="new">Сначала новые</option></select></div>
+          <div class="field"><label class="label" for="cond">Состояние</label>
+            <select id="cond"><option value="any">Любое</option><option value="new">Только новое</option><option value="used">Б/у и ресейл</option></select></div>
+          <div class="field"><label class="label" for="region">Регион (Авито)</label>
+            <select id="region"><option value="moskva">Москва</option><option value="sankt-peterburg">Санкт-Петербург</option><option value="rossiya">Вся Россия</option></select></div>
+        </div>
+      </div>
+    </details>
+    <div class="field"><span class="label">Итоговый запрос</span><div class="qline" id="qline"></div></div>
+  </div>
+  <div class="toolbar">
+    <h2 id="resTitle">Где искать</h2>
+    <div class="legend"><span><span class="badge native">фильтры</span>цена и сортировка в ссылке</span><span><span class="badge">поиск</span>через Яндекс по сайту</span></div>
+  </div>
+  <div class="list" id="results"></div>
+  <p class="small">Брендовые вещи на Wildberries, Ozon и AliExpress заметно дешевле магазинной цены почти всегда оказываются репликами. Оригиналы с проверкой подлинности ищи на Oskelly и ЦУМ Collect.</p>
+</section>
+
+<!-- ИЗБРАННОЕ -->
+<section data-view="saved" hidden>
+  <h2>Отложенные находки</h2>
+  <div class="list" id="favList"></div>
+  <h2>Хочу купить</h2>
+  <div class="panel">
+    <div class="grid">
+      <div class="field"><label class="label" for="wName">Вещь</label><input id="wName" placeholder="Кроссовки Salomon XT-6"></div>
+      <div class="field"><label class="label" for="wTarget">Беру за, ₽</label><input id="wTarget" inputmode="numeric"></div>
+    </div>
+    <button class="primary" id="wAdd">Добавить</button>
+  </div>
+  <div class="list" id="wlist"></div>
+</section>
+
+
+<!-- РАСПРОДАЖИ -->
+<section data-view="calendar" hidden>
+  <h2>Когда ждать скидок</h2>
+  <p class="lead">Ориентиры по повторяющимся распродажам. Точные даты у каждой площадки свои.</p>
+  <div class="cal" id="cal"></div>
+  <h2>Как не переплатить</h2>
+  <div class="panel"><ul class="clean">
+    <li>Сравни «зачёркнутую» цену с ценой месяц назад: перед распродажами её нередко поднимают.</li>
+    <li>На ресейле проси фото бирок, швов, фурнитуры и чек. На Oskelly и ЦУМ Collect есть проверка подлинности, на Авито её нет.</li>
+    <li>Скидка больше 75% на б/у люкс бывает, но это повод проверить подлинность особенно тщательно.</li>
+    <li>Аутлеты (ЦУМ Outlet, Familia) выгоднее всего в конце сезона, когда идёт вторая волна уценки.</li>
+  </ul></div>
+</section>
+
+</main>
+<datalist id="brandList"></datalist>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const $=(id)=>document.getElementById(id);
+const E=encodeURIComponent;
+function esc(s){return String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function num(v){const n=parseInt(String(v).replace(/\D/g,""),10);return isNaN(n)?"":n}
+function rub(n){return n===""||n==null?"—":Number(n).toLocaleString("ru-RU")+" ₽"}
+function toast(t){const el=$("toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2600)}
+const store={get(k,d){try{const v=localStorage.getItem("okh_"+k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem("okh_"+k,JSON.stringify(v))}catch(e){}}};
+function chips(el,map,getSel,onPick,multi,counts){
+  el.innerHTML="";
+  Object.entries(map).forEach(([k,v])=>{const b=document.createElement("button");b.className="chip";b.type="button";
+    b.innerHTML=esc(v)+(counts&&counts[k]!=null?`<small>${counts[k]}</small>`:"");
+    b.setAttribute("aria-pressed",multi?getSel().includes(k):getSel()===k);
+    b.onclick=()=>{onPick(k);chips(el,map,getSel,onPick,multi,counts)};el.appendChild(b)});
+}
+const BRANDS=["Moncler","Canada Goose","Stone Island","C.P. Company","The North Face","Arc'teryx","Max Mara","'S Max Mara","Weekend Max Mara","Prada","Miu Miu","Gucci","Balenciaga","Saint Laurent","Bottega Veneta","Celine","Dior","Louis Vuitton","Chanel","Hermès","Burberry","Loro Piana","Brunello Cucinelli","Zegna","Tom Ford","Acne Studios","Jil Sander","Maison Margiela","Ami Paris","Off-White","Ralph Lauren","Herno","Woolrich","Parajumpers","Nike","New Balance","Salomon","Adidas","Asics","Golden Goose"];
+$("brandList").innerHTML=BRANDS.map(b=>`<option value="${esc(b)}"></option>`).join("");
+
+/* ============ НАХОДКИ (db) ============ */
+const CATS={all:"Всё",outer:"Верхняя одежда",clothes:"Одежда",shoes:"Обувь",sneakers:"Кроссовки",bags:"Сумки",acc:"Аксессуары",sport:"Спорт"};
+const GENDERS={any:"Все",w:"Женское",m:"Мужское",k:"Детское"};
+let ALL=[];let shown=40;
+const df={brands:[],cat:"all",gender:"any",...store.get("df",{})};
+["dSize","dMin","dMax","dOff","dCond","dSort"].forEach(id=>{if(df[id]!=null)$(id).value=df[id]});
+let favs=store.get("favs",{});
+
+function median(a){if(!a.length)return null;const s=[...a].sort((x,y)=>x-y);const m=s.length>>1;return s.length%2?s[m]:(s[m-1]+s[m])/2}
+function ingest(docs){
+  const items=[];
+  docs.forEach(d=>{(d.items||[]).forEach((it,i)=>{if(typeof it.p!=="number"||!it.u||!/^https:\/\//.test(it.u))return;
+    items.push({id:d._id+"#"+i,platform:d.platform||"",brand:d.brand||"",gender:d.gender||"any",cat:d.cat||"clothes",title:d.title||"",checkedAt:d.checkedAt||"",
+      p:it.p,o:typeof it.o==="number"&&it.o>it.p?it.o:null,s:it.s||"",cond:it.cond==="used"?"used":"new",u:it.u,t:it.t||""})})});
+  // медиана по бренду+разделу+полу+состоянию
+  const groups={};items.forEach(x=>{const k=[x.brand,x.cat,x.gender,x.cond].join("|");(groups[k]=groups[k]||[]).push(x.p)});
+  items.forEach(x=>{const m=median(groups[[x.brand,x.cat,x.gender,x.cond].join("|")]);x.med=m;x.vs=m?Math.round((1-x.p/m)*100):0;x.off=x.o?Math.round((1-x.p/x.o)*100):0});
+  ALL=items;
+}
+function dCollect(){["dSize","dMin","dMax","dOff","dCond","dSort"].forEach(id=>df[id]=$(id).value.trim());store.set("df",df);return df}
+function filtered(){
+  const f=dCollect();const mn=num(f.dMin),mx=num(f.dMax),off=+f.dOff||0;
+  const sz=f.dSize.toLowerCase().replace(/\s+/g,"");
+  let r=ALL.filter(x=>(!f.brands.length||f.brands.includes(x.brand))&&(f.cat==="all"||x.cat===f.cat)&&(f.gender==="any"||x.gender===f.gender)
+    &&(mn===""||x.p>=mn)&&(mx===""||x.p<=mx)&&(x.off>=off)&&(f.dCond==="any"||x.cond===f.dCond)
+    &&(!sz||x.s.toLowerCase().replace(/\s+/g,"").split(/[\/,]/).some(p=>p===sz||p.endsWith(sz))||!sz));
+  const s={value:(a,b)=>b.vs-a.vs,off:(a,b)=>b.off-a.off,price:(a,b)=>a.p-b.p,pricedesc:(a,b)=>b.p-a.p}[f.dSort]||((a,b)=>b.vs-a.vs);
+  return r.sort(s);
+}
+function brandCounts(){const c={};ALL.forEach(x=>c[x.brand]=(c[x.brand]||0)+1);return c}
+function renderDealFilters(){
+  const c=brandCounts();const map={};Object.keys(c).sort().forEach(b=>map[b]=b);
+  if(!Object.keys(map).length){$("dBrand").innerHTML='<span class="small">Появятся, когда загрузятся находки.</span>'}
+  else chips($("dBrand"),map,()=>df.brands,k=>{df.brands=df.brands.includes(k)?df.brands.filter(x=>x!==k):[...df.brands,k];shown=40;renderDeals()},true,c);
+  chips($("dCat"),CATS,()=>df.cat,k=>{df.cat=k;shown=40;renderDeals()});
+  chips($("dGender"),GENDERS,()=>df.gender,k=>{df.gender=k;shown=40;renderDeals()});
+}
+function dealRow(x){
+  const el=document.createElement("div");el.className="deal";
+  const flags=[];
+  if(x.vs>=30)flags.push(`<span class="badge okb">на ${x.vs}% ниже медианы</span>`);
+  if(x.cond==="used")flags.push('<span class="badge">б/у</span>');else flags.push('<span class="badge">новое</span>');
+  if(x.cond==="used"&&x.off>=75)flags.push('<span class="badge warnb">проверь подлинность</span>');
+  el.innerHTML=`<div class="pricebox"><span class="now">${rub(x.p)}</span>${x.o?`<span class="was">${rub(x.o)}</span><span class="off">−${x.off}%</span>`:""}</div>
+    <div class="info"><span class="ttl">${esc(x.brand)} · ${esc(x.title)}</span>
+      <span class="sub">${esc(x.platform)}${x.s?" · размер "+esc(x.s):""} · ${esc(GENDERS[x.gender]||"")}${x.med?" · медиана "+rub(Math.round(x.med/10)*10):""}</span>
+      <div class="meta">${flags.join("")}</div></div>
+    <div class="acts"><button class="heart" aria-pressed="${!!favs[x.u]}" aria-label="Отложить">♥</button><a class="go" target="_blank" rel="noopener" href="${esc(x.u)}">Открыть ↗</a></div>`;
+  el.querySelector(".heart").onclick=(e)=>{if(favs[x.u])delete favs[x.u];else favs[x.u]={...x,savedAt:Date.now()};store.set("favs",favs);e.currentTarget.setAttribute("aria-pressed",!!favs[x.u]);toast(favs[x.u]?"Отложено в «Избранное»":"Убрано из избранного")};
+  return el;
+}
+function renderDeals(){
+  const r=filtered();const box=$("dList");box.innerHTML="";
+  $("dTitle").textContent=`Находки · ${r.length}`;
+  if(!ALL.length){box.innerHTML=`<div class="empty">${dbState==="loading"?"Загружаю находки…":"Находок пока нет. Закажи охоту, и объявления появятся после ближайшего сбора."}</div>`;$("dMoreBtn").hidden=true;return}
+  if(!r.length){box.innerHTML='<div class="empty">Под эти фильтры находок нет. Ослабь цену или размер, или закажи охоту на этот бренд.</div>';$("dMoreBtn").hidden=true;return}
+  r.slice(0,shown).forEach(x=>box.appendChild(dealRow(x)));
+  $("dMoreBtn").hidden=r.length<=shown;
+  const used=ALL.filter(x=>x.cond==="used");
+  const best=[...ALL].sort((a,b)=>b.vs-a.vs)[0];
+  const dates=[...new Set(ALL.map(x=>x.checkedAt))].sort();
+  $("stats").innerHTML=`<div class="stat"><b>${ALL.length}</b><span>объявлений</span></div><div class="stat"><b>${Object.keys(brandCounts()).length}</b><span>брендов</span></div>
+    <div class="stat"><b>${used.length}</b><span>б/у с проверкой</span></div><div class="stat"><b>${dates[dates.length-1]?new Date(dates[dates.length-1]).toLocaleDateString("ru-RU",{day:"numeric",month:"long"}):"—"}</b><span>последний сбор</span></div>`;
+  $("count").textContent=`${ALL.length} находок`;
+}
+["dSize","dMin","dMax","dOff","dCond","dSort"].forEach(id=>$(id).addEventListener("input",()=>{shown=40;renderDeals()}));
+$("dMoreBtn").onclick=()=>{shown+=40;renderDeals()};
+$("dReset").onclick=()=>{df.brands=[];df.cat="all";df.gender="any";["dSize","dMin","dMax"].forEach(id=>$(id).value="");$("dOff").value="0";$("dCond").value="any";$("dSort").value="value";shown=40;renderDealFilters();renderDeals()};
+
+/* данные */
+let dbState="loading";
+const REPO="Arab-tours/skidki";
+async function initData(){
+  try{const r=await fetch("deals.json?v="+Date.now());const j=await r.json();ingest(j.feeds||[]);dbState=ALL.length?"ready":"empty"}
+  catch(e){dbState="empty"}
+  renderDealFilters();renderDeals();
+  loadHunts();
+}
+/* ============ ЗАКАЗАТЬ ОХОТУ ============ */
+let HUNTS=[];
+async function loadHunts(){
+  try{const r=await fetch(`https://api.github.com/repos/${REPO}/issues?labels=hunt&state=all&per_page=50`);if(!r.ok)throw 0;
+    const j=await r.json();HUNTS=j.filter(i=>!i.pull_request).map(i=>{const labels=(i.labels||[]).map(l=>l.name);
+      return {title:i.title,url:i.html_url,state:labels.includes("found")?"done":labels.includes("nothing")?"none":i.state==="closed"?"done":"queued",created:i.created_at}})}
+  catch(e){HUNTS=null}
+  renderHunt();
+}
+function renderHunt(){
+  const box=$("hList");box.innerHTML="";
+  if(HUNTS===null){box.innerHTML='<div class="empty">Не удалось загрузить заявки с GitHub. Попробуй обновить страницу позже.</div>';return}
+  if(!HUNTS.length){box.innerHTML='<div class="empty">Заявок нет. Например: Stone Island, куртка, мужское, L, до 40 000 ₽.</div>';return}
+  HUNTS.forEach(h=>{const r=document.createElement("div");r.className="row";
+    const st=h.state==="done"?'<span class="badge okb">найдено</span>':h.state==="none"?'<span class="badge warnb">пока ничего</span>':'<span class="badge hot">в очереди</span>';
+    r.innerHTML=`<div style="min-width:0"><div class="name">${esc(h.title.replace(/^Охота:\s*/,""))} ${st}</div><div class="note">${new Date(h.created).toLocaleDateString("ru-RU",{day:"numeric",month:"long"})}</div></div><a class="go" target="_blank" rel="noopener" href="${esc(h.url)}">Заявка ↗</a>`;
+    box.appendChild(r)});
+}
+function huntUrl(){const brand=$("hBrand").value.trim();
+  const g={m:"мужское",w:"женское",k:"детское"}[$("hGender").value];const what=$("hWhat").value.trim();const size=$("hSize").value.trim();const max=num($("hMax").value);
+  const title=`Охота: ${brand}${what?" · "+what:""} · ${g}${size?" · "+size:""}${max?" · до "+max+" ₽":""}`;
+  const body=["```hunt",`brand: ${brand}`,`what: ${what}`,`gender: ${$("hGender").value}`,`size: ${size}`,`max: ${max||""}`,`cond: ${$("hCond").value}`,"```"].join("\n");
+  return `https://github.com/${REPO}/issues/new?labels=hunt&title=${E(title)}&body=${E(body)}`}
+$("hAdd").onclick=()=>{if(!$("hBrand").value.trim()){toast("Укажи бренд");return}
+  const a=document.createElement("a");a.href=huntUrl();a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove();
+  $("hState").textContent="Открылась страница заявки на GitHub. Нажми там «Create», и заявка попадёт в очередь.";};
+$("hState").textContent="Заявка оформляется как задача на GitHub (нужен аккаунт GitHub). Сбор раз в день, найденное появляется в «Находках».";
+
+/* ============ ПОИСК ПО ПЛОЩАДКАМ ============ */
+const TYPES={market:"Маркетплейс",lux:"Люкс и премиум",resale:"Ресейл",outlet:"Аутлет",mass:"Масс-маркет",sport:"Спорт и кроссовки",dept:"Универмаг"};
+const CATWORD={all:"",outer:"верхняя одежда",clothes:"",shoes:"обувь",sneakers:"кроссовки",bags:"сумка",acc:"аксессуары",sport:"спортивная одежда"};
+const GWORD={any:"",w:"женский",m:"мужской",k:"детский"};
+const ya=(q)=>"https://yandex.ru/search/?text="+E(q);
+const P=[
+ {id:"avito",name:"Авито",t:["resale","market"],note:"Б/у и новое от частников; торг уместен",native:true,url:(q,f)=>{let u=`https://www.avito.ru/${f.region}?q=${E(q)}`;if(f.pmin)u+=`&pmin=${f.pmin}`;if(f.pmax)u+=`&pmax=${f.pmax}`;const s={price:1,new:104}[f.sort];if(s)u+=`&s=${s}`;return u}},
+ {id:"oskelly",name:"Oskelly",t:["resale","lux"],note:"Ресейл люкса с проверкой подлинности",site:"oskelly.ru"},
+ {id:"tsum",name:"ЦУМ",t:["lux","dept"],note:"Новые коллекции люкса",site:"tsum.ru"},
+ {id:"tsumcollect",name:"ЦУМ Collect",t:["resale","lux"],note:"Ресейл от ЦУМа с экспертизой",site:"collect.tsum.ru"},
+ {id:"tsumoutlet",name:"ЦУМ Outlet",t:["outlet","lux"],note:"Прошлые сезоны люкса со скидкой",site:"outlet.tsum.ru"},
+ {id:"ozon",name:"Ozon",t:["market"],note:"Брендовое дешевле рынка часто реплика",native:true,url:(q,f)=>{let u=`https://www.ozon.ru/search/?text=${E(q)}&from_global=true`;const s={price:"price",discount:"discount",popular:"score",new:"new"}[f.sort];if(s)u+=`&sorting=${s}`;if(f.pmin||f.pmax)u+=`&currency_price=${(f.pmin||0)}.000%3B${(f.pmax||9999999)}.000`;return u}},
+ {id:"ozonselect",name:"Ozon Select",t:["market","lux"],note:"Премиальная подборка внутри Ozon",kw:"Ozon Select"},
+ {id:"wb",name:"Wildberries",t:["market"],note:"Брендовое дешевле рынка часто реплика",native:true,url:(q,f)=>{let u=`https://www.wildberries.ru/catalog/0/search.aspx?search=${E(q)}`;const s={price:"priceup",discount:"benefit",popular:"popular",new:"newly"}[f.sort];if(s)u+=`&sort=${s}`;if(f.pmin||f.pmax)u+=`&priceU=${(f.pmin||0)*100}%3B${(f.pmax||9999999)*100}`;return u}},
+ {id:"ym",name:"Яндекс Маркет",t:["market"],note:"Сравнение продавцов в одной карточке",native:true,url:(q,f)=>{let u=`https://market.yandex.ru/search?text=${E(q)}`;if(f.pmin)u+=`&pricefrom=${f.pmin}`;if(f.pmax)u+=`&priceto=${f.pmax}`;const s={price:"aprice",discount:"discount_p"}[f.sort];if(s)u+=`&how=${s}`;return u}},
+ {id:"mm",name:"Мегамаркет",t:["market"],note:"Бывший СберМегаМаркет; бонусы",native:true,url:(q)=>`https://megamarket.ru/catalog/?q=${E(q)}`},
+ {id:"ali",name:"AliExpress Россия",t:["market"],note:"Дёшево, но долго и сложный возврат",native:true,url:(q)=>`https://aliexpress.ru/wholesale?SearchText=${E(q)}`},
+ {id:"cdek",name:"СДЭК Шоппинг",t:["market"],note:"Заказ из зарубежных магазинов",site:"cdek.shopping"},
+ {id:"lamoda",name:"Lamoda",t:["market","mass"],note:"Примерка при получении",native:true,url:(q)=>`https://www.lamoda.ru/catalogsearch/result/?q=${E(q)}`},
+ {id:"vip",name:"VIP Avenue",t:["lux"],note:"Мультибрендовый люкс",site:"vipavenue.ru"},
+ {id:"ga",name:"Золотое яблоко",t:["lux","dept"],note:"Косметика и премиальная одежда",site:"goldapple.ru"},
+ {id:"12s",name:"12 Storeez",t:["mass"],note:"Базовый гардероб",site:"12storeez.com"},
+ {id:"sq",name:"Снежная Королева",t:["mass"],note:"Верхняя одежда, кожа и мех",site:"snowqueen.ru"},
+ {id:"sm",name:"Спортмастер",t:["sport"],note:"Спорт и туризм",site:"sportmaster.ru"},
+ {id:"elyts",name:"Elyts",t:["lux"],note:"Онлайн-бутик люкса",site:"elyts.ru"},
+ {id:"fam",name:"Familia",t:["outlet"],note:"Офф-прайс брендов",site:"familia.ru"},
+ {id:"gum",name:"ГУМ",t:["lux","dept"],note:"Универмаг на Красной площади",site:"gum.ru"},
+ {id:"gumout",name:"ГУМ Outlet",t:["outlet","lux"],note:"Уценка от ГУМа",kw:"ГУМ аутлет"},
+ {id:"hend",name:"Henderson",t:["mass"],note:"Мужская одежда и костюмы",site:"henderson.ru"},
+ {id:"cerca",name:"Cerca Trova",t:["lux"],note:"Мультибрендовый премиум",kw:"Cerca Trova"},
+ {id:"lime",name:"Lime",t:["mass"],note:"Масс-маркет",site:"lime-shop.com"},
+ {id:"lg",name:"Lady & Gentleman City",t:["mass"],note:"Классика и офис",site:"ladyandgentleman.com"},
+ {id:"rv",name:"Рандеву",t:["mass"],note:"Обувь и сумки",site:"rendez-vous.ru"},
+ {id:"sb",name:"Street Beat",t:["sport"],note:"Кроссовки и стритвир",site:"street-beat.ru"},
+ {id:"lr",name:"Love Republic",t:["mass"],note:"Женский масс-маркет",site:"loverepublic.ru"},
+ {id:"bs",name:"Brandshop",t:["sport","lux"],note:"Стритвир и редкие кроссовки",site:"brandshop.ru"}
+];
+const st={cat:"all",gender:"any",types:[],brands:[],...store.get("filters",{})};
+const fields=["q","brand","size","pmin","pmax","sort","cond","region"];
+fields.forEach(id=>{if(st[id]!=null&&st[id]!=="")$(id).value=st[id]});
+const TOPB={};BRANDS.slice(0,24).forEach(b=>TOPB[b]=b);
+function collect(){fields.forEach(id=>st[id]=$(id).value.trim());st.pmin=num(st.pmin);st.pmax=num(st.pmax);store.set("filters",st);return st}
+function buildQuery(f,brand){const parts=[brand,f.q];const cw=CATWORD[f.cat];if(cw&&!f.q.toLowerCase().includes(cw.split(" ")[0]))parts.push(cw);if(GWORD[f.gender])parts.push(GWORD[f.gender]);if(f.cond==="used")parts.push("б/у");return parts.filter(Boolean).join(" ").replace(/\s+/g," ").trim()}
+function priceWords(f){let s="";if(f.pmin)s+=" от "+f.pmin;if(f.pmax)s+=" до "+f.pmax+" руб";return s}
+function linkFor(p,q,f){if(p.native)return p.url(q,f);if(p.site)return ya(`${q}${priceWords(f)} site:${p.site}`);return ya(`${p.kw} ${q}${priceWords(f)}`)}
+function update(){
+  const f=collect();const brands=[...f.brands];if(f.brand)brands.push(f.brand);
+  const qs=brands.length?brands.map(b=>buildQuery(f,b)):[buildQuery(f,"")||"одежда"];
+  $("qline").textContent=qs.join("  |  ")+(f.pmin||f.pmax?`  ·  ${rub(f.pmin||0)} – ${f.pmax?rub(f.pmax):"∞"}`:"");
+  let list=P.slice();if(f.types.length)list=list.filter(p=>p.t.some(t=>f.types.includes(t)));
+  if(f.cond==="used")list=list.filter(p=>p.t.includes("resale"));
+  $("resTitle").textContent=`Где искать · ${list.length}`;
+  const box=$("results");box.innerHTML="";
+  if(!list.length){box.innerHTML='<div class="empty">Под эти фильтры площадок нет. Сними тип площадки.</div>';return}
+  list.forEach(p=>{const r=document.createElement("div");r.className="row";
+    const links=qs.map((q,i)=>`<a class="go" target="_blank" rel="noopener" href="${esc(linkFor(p,q,f))}">${qs.length>1?esc(brands[i]):"Открыть"} ↗</a>`).join("");
+    r.innerHTML=`<div style="min-width:0"><div class="name">${esc(p.name)} <span class="badge ${p.native?"native":""}">${p.native?"фильтры":"поиск"}</span></div><div class="note">${esc(p.note)}</div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">${links}</div>`;box.appendChild(r)});
+}
+fields.forEach(id=>$(id).addEventListener("input",update));
+function drawSearchChips(){
+  chips($("fBrand"),TOPB,()=>st.brands,k=>{st.brands=st.brands.includes(k)?st.brands.filter(x=>x!==k):[...st.brands,k];update()},true);
+  chips($("fCat"),CATS,()=>st.cat,k=>{st.cat=k;update()});
+  chips($("fGender"),GENDERS,()=>st.gender,k=>{st.gender=k;update()});
+  chips($("fType"),TYPES,()=>st.types,k=>{st.types=st.types.includes(k)?st.types.filter(x=>x!==k):[...st.types,k];update()},true);
+}
+drawSearchChips();
+
+/* ============ ИЗБРАННОЕ ============ */
+let wish=store.get("wish",[]);
+function renderSaved(){
+  const fb=$("favList");fb.innerHTML="";const fl=Object.values(favs).sort((a,b)=>b.savedAt-a.savedAt);
+  if(!fl.length)fb.innerHTML='<div class="empty">Нажми ♥ у находки, и она появится здесь.</div>';else fl.forEach(x=>fb.appendChild(dealRow(x)));
+  const w=$("wlist");w.innerHTML="";
+  if(!wish.length)w.innerHTML='<div class="empty">Добавь вещь и цену, за которую готов её взять.</div>';
+  wish.forEach((it,i)=>{const r=document.createElement("div");r.className="row";
+    const cheaper=ALL.filter(x=>it.name.toLowerCase().includes(x.brand.toLowerCase())&&(!it.target||x.p<=it.target)).length;
+    r.innerHTML=`<div style="min-width:0"><div class="name">${esc(it.name)}</div><div class="note">беру за ${rub(it.target)}${cheaper?` · <b class="ok">${cheaper} находок в бюджете</b>`:""}</div></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap"><button class="ghost" data-a="hunt">Заказать охоту</button><button class="ghost" data-a="del">Удалить</button></div>`;
+    r.querySelector('[data-a="del"]').onclick=()=>{wish.splice(i,1);store.set("wish",wish);renderSaved()};
+    r.querySelector('[data-a="hunt"]').onclick=()=>{const b=BRANDS.find(b=>it.name.toLowerCase().includes(b.toLowerCase()));$("hBrand").value=b||"";$("hWhat").value=b?it.name.replace(new RegExp(b,"i"),"").trim():it.name;$("hMax").value=it.target||"";location.hash="hunt"};
+    w.appendChild(r)});
+}
+$("wAdd").onclick=()=>{const name=$("wName").value.trim();if(!name){toast("Напиши, что за вещь");return}wish.unshift({name,target:num($("wTarget").value)});store.set("wish",wish);$("wName").value="";$("wTarget").value="";renderSaved()};
+
+/* ============ РАСПРОДАЖИ ============ */
+const CAL=[["11 ноября","Распродажа 11.11 на AliExpress и маркетплейсах"],["конец ноября","Чёрная пятница, включая люксовые площадки"],["декабрь","Предновогодние акции и промокоды"],["январь – февраль","Финальная уценка осенне-зимних коллекций"],["июнь – июль","Летние распродажи весенне-летних коллекций"],["август","Остатки лета по минимальным ценам"]];
+$("cal").innerHTML=CAL.map(([w,t])=>`<div class="row"><span class="when">${w}</span><span>${t}</span></div>`).join("");
+
+/* ============ маршруты ============ */
+const VIEWS=["deals","hunt","search","saved","calendar"];
+function route(){const v=(location.hash||"#deals").slice(1);const ok=VIEWS.includes(v)?v:"deals";
+  document.querySelectorAll("section[data-view]").forEach(s=>s.hidden=s.dataset.view!==ok);
+  document.querySelectorAll("#nav a").forEach(a=>{if(a.getAttribute("href")==="#"+ok)a.setAttribute("aria-current","page");else a.removeAttribute("aria-current")});
+  if(ok==="saved")renderSaved();window.scrollTo(0,0)}
+addEventListener("hashchange",route);
+renderDealFilters();renderDeals();update();route();
+initData();
+</script>
+</body>
+</html>
