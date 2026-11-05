@@ -1,0 +1,24 @@
+#'S Max Mara|w|outer
+palto-s-max-mara-new-6749052|88500|-|IT 42/44/46|7f0cd087-520e-4430-91ba-f07e1209d12e
+palto-s-max-mara-new-6748935|79280|-|IT 42/44|a056f15c-2591-4c9a-9dd4-938fe987b6ce
+palto-s-max-mara-new-6721773|80740|99662|IT 44|018fb960-1ba8-461a-8ed1-8ef73895d367
+palto-s-max-mara-new-6735266|71132|89952|IT 38/40/42|932101a8-6ced-4bc2-b72e-22cbe66f44bf
+palto-s-max-mara-pre-owned-6715255|22000|30000|EU 34|242aaddc-3ffb-470c-a7f3-4c7e33fc4c51
+palto-s-max-mara-new-6731498|58000|95000|EU 40|505c7dc4-2d61-4dad-93a1-aab0e706aa3e
+palto-s-max-mara-pre-owned-6323862|61200|92000|IT 40|fa1151fb-0c1d-48a3-8230-1cbbc1bbe47c
+palto-s-max-mara-new-6718937|63468|77861|IT 36/38/40/42|b05c520a-5289-404f-8c59-a2232b253578
+palto-s-max-mara-new-6713684|53858|68701|IT 42|2c3629a2-cabb-4b66-87e0-f07e0ed7e2d8
+palto-s-max-mara-new-6696251|80990|116000|INT 2XS|79d236df-5cf8-4be1-bb32-84a26e8f02f6
+palto-s-max-mara-pre-owned-6691575|33340|-|FR 38|46899ccd-9b31-429a-806c-3e6869f88e36
+palto-s-max-mara-new-6692047|48000|-|IT 36|d562603d-8742-4d6a-bfdc-b7510dc771d5
+palto-s-max-mara-pre-owned-6666449|20000|-|EU 46|ce3e3020-bb42-4d35-8999-c07dea5cb3f0
+palto-s-max-mara-pre-owned-6657669|55000|110000|IT 40|9a377931-a1e5-4b77-9517-f30918b80a38
+palto-s-max-mara-pre-owned-6569301|55000|-|INT S|0ee487f3-4a4f-4514-abd8-df82ec7d98e9
+palto-s-max-mara-new-6652232|62802|89952|IT 38/40/42/44|a7b5fe27-2e8a-4cdd-8815-b60126a0aa98
+palto-s-max-mara-new-6652782|66002|94532|IT 38/40|e0df3a6c-4369-4c42-b4e1-eb2d5ed4e69f
+palto-s-max-mara-pre-owned-6646607|75000|100000|RU 36|a31cc1b6-a68c-4602-bb61-5342cb803e69
+palto-s-max-mara-pre-owned-6640384|33340|-|INT S|d310b229-d8d8-4bf2-b7df-bf5d4bbd2d6d
+palto-s-max-mara-pre-owned-6648258|20000|-|EU 34|0e0c4afc-9bdb-46cb-b5d7-1d0baaf48139
+palto-s-max-mara-pre-owned-6640706|23000|98000|EU 40|5217969b-a5c9-4c86-8f40-aa956e09cc40
+palto-s-max-mara-pre-owned-5423479|67000|140000|INT XS|186d74b0-46c3-494c-a9d9-b80cc87b1778
+palto-s-max-mara-pre-owned-5445419|60000|-|INT XS|bc6584b7-ad7e-40a2-bcaa-3c67ac1461f6
