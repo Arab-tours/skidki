@@ -73,7 +73,7 @@ button{cursor:pointer}
 .hero h1{margin:0;font-family:var(--display);font-weight:400;font-size:clamp(34px,5.2vw,64px);line-height:1;letter-spacing:.02em;text-transform:uppercase;text-wrap:balance}
 .hero h1 em{font-style:normal;color:var(--sale)}
 .hero p{margin:12px 0 0;color:var(--ink-2);max-width:60ch}
-.stats{display:flex;gap:28px}
+.stats{display:flex;flex-wrap:wrap;gap:12px 28px}
 .stat b{display:block;font-family:var(--mono);font-size:22px;font-weight:500;letter-spacing:-.02em}
 .stat span{font-size:12px;color:var(--ink-3);text-transform:uppercase;letter-spacing:.08em}
 
@@ -164,6 +164,16 @@ button{cursor:pointer}
 .prow{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-top:2px}
 .now{font-family:var(--mono);font-weight:700;font-size:16px;letter-spacing:-.02em}
 .was{font-family:var(--mono);font-size:12px;color:var(--ink-3);text-decoration:line-through}
+.warn{position:absolute;right:8px;bottom:8px;background:#F2B53A;color:#1E1503;font-size:11px;font-weight:700;padding:3px 7px;border-radius:2px;letter-spacing:.02em}
+.flag{font-size:12px;color:#8A5A00;background:#FFF3D6;padding:4px 8px;border-radius:3px;margin-top:4px;line-height:1.35}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .flag{color:#F5C46A;background:#3A2A0C}}
+:root[data-theme="dark"] .flag{color:#F5C46A;background:#3A2A0C}
+.src{font-size:11px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase}
+.lvl{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.lvl button{height:auto;min-height:44px;padding:6px 4px;border:1px solid var(--line);background:var(--card);border-radius:6px;font-size:13px;font-weight:600;line-height:1.2}
+.lvl button small{display:block;font-weight:400;font-size:11px;color:var(--ink-3)}
+.lvl button[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.lvl button[aria-pressed="true"] small{color:inherit;opacity:.75}
 .vs{align-self:flex-start;font-size:12px;font-weight:600;color:var(--good);background:var(--good-bg);padding:2px 7px;border-radius:2px;margin-top:2px}
 .more{display:flex;flex-direction:column;align-items:center;gap:10px;margin-top:40px}
 .more button{height:48px;padding:0 28px;border:1px solid var(--ink);background:transparent;border-radius:999px;font-weight:600}
@@ -197,7 +207,7 @@ button{cursor:pointer}
   .cats{overflow-x:auto;scrollbar-width:none;margin-inline:-4px}.cats::-webkit-scrollbar{display:none}
   .nav{gap:0}.nav a{padding:0 9px;font-size:13px;height:34px}
   .hero{grid-template-columns:1fr;padding-block:24px 18px}
-  .stats{gap:18px}
+  .stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 18px}
   .grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:22px 12px}
   .rhead .sortwrap{order:3;width:100%}
   .sort{width:100%}
@@ -256,10 +266,11 @@ footer{border-top:1px solid var(--line);padding-block:24px;color:var(--ink-3);fo
     <div class="hero">
       <div>
         <h1>Люкс <em>ниже рынка</em></h1>
-        <p>Реальные объявления с Oskelly: новые вещи и ресейл с проверкой подлинности. Каждое сравниваем с медианой цены той же вещи того же бренда.</p>
+        <p>Только самые выгодные предложения из Oskelly, The Cultt, VIP Avenue и Ozon. Каждое сравниваем с медианой цены той же вещи. Подозрительно дешёвое не прячем, а помечаем.</p>
       </div>
       <div class="stats" aria-live="polite">
-        <div class="stat"><b id="sItems">—</b><span>вещей</span></div>
+        <div class="stat"><b id="sItems">—</b><span>находок</span></div>
+        <div class="stat"><b id="sScanned">—</b><span>просмотрено</span></div>
         <div class="stat"><b id="sBrands">—</b><span>брендов</span></div>
         <div class="stat"><b id="sDate">—</b><span>обновлено</span></div>
       </div>
@@ -273,6 +284,18 @@ footer{border-top:1px solid var(--line);padding-block:24px;color:var(--ink-3);fo
 
     <div class="shop">
       <aside class="side" id="side" aria-label="Фильтры">
+        <div class="fgroup">
+          <div class="fhead"><h3>Насколько выгодно</h3></div>
+          <div class="lvl" id="fLevel"></div>
+        </div>
+        <div class="fgroup">
+          <div class="fhead"><h3>Подлинность</h3></div>
+          <div class="pills" id="fAuth"></div>
+        </div>
+        <div class="fgroup">
+          <div class="fhead"><h3>Где продаётся</h3><button type="button" data-reset="srcs">Сбросить</button></div>
+          <div class="checks" id="fSrc"></div>
+        </div>
         <div class="fgroup">
           <div class="fhead"><h3>Бренд</h3><button type="button" data-reset="brands">Сбросить</button></div>
           <input class="mini" id="brandQ" placeholder="Найти бренд" aria-label="Найти бренд">
@@ -337,7 +360,7 @@ footer{border-top:1px solid var(--line);padding-block:24px;color:var(--ink-3);fo
         <div class="active" id="active"></div>
         <div class="grid" id="grid" aria-live="polite"></div>
         <div class="more" id="more" hidden><button type="button" class="press" id="moreBtn">Показать ещё</button><small id="moreInfo"></small></div>
-        <p class="note">Цены и наличие проверены в день сбора. Хорошие вещи уходят быстро: нажми на карточку, чтобы открыть объявление на Oskelly. Медиана считается по той же вещи того же бренда в том же состоянии среди собранных объявлений. Б/у со скидкой больше 75% проверяй особенно внимательно.</p>
+        <p class="note">Цены и наличие проверены в день сбора, хорошие вещи уходят быстро. Медиана считается по той же модели (The Cultt) или тому же типу вещи бренда в том же состоянии. Oskelly, The Cultt и VIP Avenue проверяют подлинность сами; на Ozon люксовые бренды за такие деньги почти всегда реплики, такие карточки помечены «⚠ Проверь». Пометка не означает, что вещь точно поддельная: это повод запросить у продавца фото бирок, чек и проверку.</p>
       </div>
     </div>
   </div>
@@ -385,7 +408,7 @@ footer{border-top:1px solid var(--line);padding-block:24px;color:var(--ink-3);fo
 </section>
 </main>
 
-<footer><div class="wrap">Данные: Oskelly. Сайт не связан с площадками и ничего не продаёт, только находит и сравнивает объявления.</div></footer>
+<footer><div class="wrap">Данные: Oskelly, The Cultt, VIP Avenue, Ozon. Сбор раз в день с соблюдением robots.txt площадок. Сайт не связан с площадками и ничего не продаёт, только находит и сравнивает объявления.</div></footer>
 <datalist id="brandList"></datalist>
 <div class="scrim" id="scrim"></div>
 <div class="toast" id="toast" role="status" hidden></div>
@@ -410,15 +433,21 @@ const CONDS=[["any","Любое"],["new","Новое"],["used","Б/у"]];
 const PAGE=48;
 
 let ALL=[],updated="";
-const F=Object.assign({g:"all",c:"all",brands:[],types:[],letters:[],shoes:[],pmin:null,pmax:null,off:0,cond:"any",below:false,hasOld:false,q:"",sort:"value"},store.get("f",{}));
+const LEVELS=[["ultra","Ультра","скидка от 50%"],["strong","Сильные","от 30%"],["all","Все","любые"]];
+const AUTHS=[["all","Все"],["verified","Оригиналы"],["noflag","Без подозрений"],["flagged","Только подозрительные"]];
+const F=Object.assign({lvl:"ultra",auth:"all",srcs:[],g:"all",c:"all",brands:[],types:[],letters:[],shoes:[],pmin:null,pmax:null,off:0,cond:"any",below:false,hasOld:false,q:"",sort:"value"},store.get("f2",{}));
 let shown=PAGE;
 let favs=store.get("favs",{});
 
-const img=(it,v)=>it.i?`https://static.cdn.oskelly.ru/product/${it.id}/${v}-${it.i}.jpg`:"";
-const offOf=it=>it.o?Math.round((1-it.p/it.o)*100):0;
+const big=u=>u.includes("static.cdn.oskelly.ru")?u.replace("/tiny-","/item-"):u.includes("ozone.ru")?u.replace(/\/w?c\d+\//,"/wc1000/"):u;
+const offOf=it=>it.off??(it.o?Math.round((1-it.p/it.o)*100):0);
+const lvlOk=it=>F.lvl==="all"||(F.lvl==="ultra"?(offOf(it)>=50||(it.v??0)>=50):(offOf(it)>=30||(it.v??0)>=30));
 
 /* ---------- filtering ---------- */
 function matches(it,skip){
+  if(skip!=="lvl"&&!lvlOk(it))return false;
+  if(skip!=="auth"){if(F.auth==="verified"&&!it.auth)return false;if(F.auth==="noflag"&&it.f)return false;if(F.auth==="flagged"&&!it.f)return false}
+  if(skip!=="srcs"&&F.srcs.length&&!F.srcs.includes(it.src))return false;
   if(skip!=="g"&&F.g!=="all"&&it.g!==F.g)return false;
   if(skip!=="c"&&F.c!=="all"&&it.c!==F.c)return false;
   if(skip!=="brands"&&F.brands.length&&!F.brands.includes(it.b))return false;
@@ -430,16 +459,16 @@ function matches(it,skip){
   if(F.cond!=="any"&&it.k!==F.cond)return false;
   if(F.below&&!(it.v>0))return false;
   if(F.hasOld&&!it.o)return false;
-  if(F.q){const q=F.q.toLowerCase();if(!(it.b+" "+it.t).toLowerCase().includes(q)&&!it.u.toLowerCase().includes(q.replace(/\s+/g,"-")))return false}
+  if(F.q){const q=F.q.toLowerCase();if(!(it.b+" "+it.t+" "+it.src).toLowerCase().includes(q)&&!it.u.toLowerCase().includes(q.replace(/\s+/g,"-")))return false}
   return true;
 }
 const score=it=>Math.max(offOf(it),0)*0.6+Math.max(Math.min(it.v??0,80),0)*0.4;
-const SORTS={value:(a,b)=>score(b)-score(a),off:(a,b)=>offOf(b)-offOf(a),cheap:(a,b)=>a.p-b.p,pricey:(a,b)=>b.p-a.p,fresh:(a,b)=>b.id-a.id};
+const SORTS={value:(a,b)=>(b.x??score(b))-(a.x??score(a)),off:(a,b)=>offOf(b)-offOf(a),cheap:(a,b)=>a.p-b.p,pricey:(a,b)=>b.p-a.p,fresh:(a,b)=>String(b.id).localeCompare(String(a.id),undefined,{numeric:true})};
 function results(){return ALL.filter(it=>matches(it)).sort(SORTS[F.sort]||SORTS.value)}
 function countBy(key,skip){const c={};ALL.forEach(it=>{if(matches(it,skip)){const k=it[key];c[k]=(c[k]||0)+1}});return c}
 
 /* ---------- rendering filters ---------- */
-function save(){store.set("f",F)}
+function save(){store.set("f2",F)}
 function seg(el,list,get,set){el.innerHTML="";list.forEach(([v,l])=>{const b=document.createElement("button");b.type="button";b.textContent=l;b.setAttribute("aria-pressed",get()===v);b.onclick=()=>{set(v);apply()};el.appendChild(b)})}
 function checks(el,entries,sel,onTog){
   el.innerHTML="";
@@ -448,6 +477,11 @@ function checks(el,entries,sel,onTog){
     lab.querySelector("input").onchange=()=>{onTog(v);apply()};el.appendChild(lab)});
 }
 function drawFilters(){
+  const lc0={};LEVELS.forEach(([v])=>{const keep=F.lvl;F.lvl=v;lc0[v]=ALL.filter(it=>matches(it)).length;F.lvl=keep});
+  $("fLevel").innerHTML="";LEVELS.forEach(([v,l,s])=>{const b=document.createElement("button");b.type="button";b.className="press";b.innerHTML=`${l}<small>${s} · ${lc0[v]}</small>`;b.setAttribute("aria-pressed",F.lvl===v);b.onclick=()=>{F.lvl=v;apply()};$("fLevel").appendChild(b)});
+  $("fAuth").innerHTML="";AUTHS.forEach(([v,l])=>{const b=document.createElement("button");b.type="button";b.textContent=l;b.setAttribute("aria-pressed",F.auth===v);b.onclick=()=>{F.auth=v;apply()};$("fAuth").appendChild(b)});
+  const sc0=countBy("src","srcs");const sAll={};ALL.forEach(it=>sAll[it.src]=1);
+  checks($("fSrc"),Object.keys(sAll).sort().map(s=>[s,sc0[s]||0]),F.srcs,v=>F.srcs=F.srcs.includes(v)?F.srcs.filter(x=>x!==v):[...F.srcs,v]);
   seg($("gender"),GENDERS,()=>F.g,v=>F.g=v);
   const cc=countBy("c","c");$("cats").innerHTML="";
   CATS.forEach(([v,l])=>{const n=v==="all"?Object.values(cc).reduce((a,b)=>a+b,0):(cc[v]||0);if(v!=="all"&&!n&&F.c!==v)return;
@@ -489,6 +523,9 @@ function drawFilters(){
 }
 function activeChips(){
   const a=[];
+  if(F.lvl!=="ultra")a.push([LEVELS.find(x=>x[0]===F.lvl)[1]+" находки",()=>F.lvl="ultra"]);
+  if(F.auth!=="all")a.push([AUTHS.find(x=>x[0]===F.auth)[1],()=>F.auth="all"]);
+  F.srcs.forEach(s=>a.push([s,()=>F.srcs=F.srcs.filter(x=>x!==s)]));
   if(F.g!=="all")a.push([GENDERS.find(x=>x[0]===F.g)[1],()=>F.g="all"]);
   if(F.c!=="all")a.push([CATS.find(x=>x[0]===F.c)[1],()=>{F.c="all";F.types=[]}]);
   F.brands.forEach(b=>a.push([b,()=>F.brands=F.brands.filter(x=>x!==b)]));
@@ -503,7 +540,7 @@ function activeChips(){
   if(F.q)a.push(["«"+F.q+"»",()=>{F.q="";$("q").value=""}]);
   return a;
 }
-function resetAll(){Object.assign(F,{g:"all",c:"all",brands:[],types:[],letters:[],shoes:[],pmin:null,pmax:null,off:0,cond:"any",below:false,hasOld:false,q:""});$("q").value="";$("brandQ").value="";apply()}
+function resetAll(){Object.assign(F,{lvl:"ultra",auth:"all",srcs:[],g:"all",c:"all",brands:[],types:[],letters:[],shoes:[],pmin:null,pmax:null,off:0,cond:"any",below:false,hasOld:false,q:""});$("q").value="";$("brandQ").value="";apply()}
 
 /* ---------- cards ---------- */
 const HEART='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-9.2-8.6C1.3 8.3 3.1 5 6.4 5c2 0 3.4 1.1 4.1 2.3h3C14.2 6.1 15.6 5 17.6 5c3.3 0 5.1 3.3 3.6 6.4C19 15.6 12 20 12 20z"/></svg>';
@@ -511,13 +548,16 @@ function card(it){
   const a=document.createElement("a");a.className="card";a.href=it.u;a.target="_blank";a.rel="noopener";
   const off=offOf(it);
   const sizeTxt=it.s?it.s.replace(/^INT /,"").replace(/^COLLAR_CENTIMETERS /,"ворот "):"";
-  a.innerHTML=`<div class="ph">${it.i?`<img loading="lazy" decoding="async" referrerpolicy="no-referrer" alt="${esc(it.b+", "+it.t.toLowerCase())}" src="${img(it,"tiny")}" srcset="${img(it,"tiny")} 270w, ${img(it,"item")} 1080w" sizes="(max-width:640px) 50vw, (max-width:1100px) 33vw, 270px">`:`<div class="noimg">${esc(it.b)}</div>`}
-      ${off>=5?`<span class="off">−${off}%</span>`:""}<span class="cond">${it.k==="used"?"Б/у":"Новое"}</span>
+  const cond=it.cond?it.cond:(it.k==="used"?"Б/у":"Новое");
+  const im=it.i?(big(it.i)!==it.i?`<img loading="lazy" decoding="async" referrerpolicy="no-referrer" alt="${esc(it.b+", "+it.t.toLowerCase())}" src="${esc(it.i)}" srcset="${esc(it.i)} 1x, ${esc(big(it.i))} 2x">`:`<img loading="lazy" decoding="async" referrerpolicy="no-referrer" alt="${esc(it.b+", "+it.t.toLowerCase())}" src="${esc(it.i)}">`):`<div class="noimg">${esc(it.b)}</div>`;
+  a.innerHTML=`<div class="ph">${im}
+      ${off>=5?`<span class="off">−${off}%</span>`:""}<span class="cond">${esc(cond)}</span>${it.f?`<span class="warn">⚠ Проверь</span>`:""}
       <button type="button" class="heart press" aria-label="В избранное" aria-pressed="${!!favs[it.id]}">${HEART}</button></div>
-    <div class="meta"><span class="brand">${esc(it.b)}</span><span class="type">${esc(it.t)}${sizeTxt?" · "+esc(sizeTxt):""}</span>
+    <div class="meta"><span class="src">${esc(it.src)}${it.auth==="shop"?" · магазин":it.auth?" · с проверкой":""}</span><span class="brand">${esc(it.b)}</span><span class="type">${esc(it.t)}${sizeTxt?" · "+esc(sizeTxt):""}</span>
       <div class="prow"><span class="now">${rub(it.p)}</span>${it.o?`<span class="was">${rub(it.o)}</span>`:""}</div>
-      ${it.v>=15?`<span class="vs" title="Медиана ${rub(it.m)} среди похожих объявлений">на ${it.v}% дешевле медианы</span>`:""}</div>`;
-  const im=a.querySelector("img");if(im){if(im.complete&&im.naturalWidth)im.classList.add("ok");else{im.onload=()=>im.classList.add("ok");im.onerror=()=>{im.replaceWith(Object.assign(document.createElement("div"),{className:"noimg",textContent:it.b}))}}}
+      ${it.v>=15?`<span class="vs" title="Медиана ${rub(it.m)} среди похожих объявлений">на ${it.v}% дешевле медианы</span>`:""}
+      ${it.f?`<span class="flag">${esc(it.f[0])}</span>`:""}</div>`;
+  const ie=a.querySelector("img");if(ie){if(ie.complete&&ie.naturalWidth)ie.classList.add("ok");else{ie.onload=()=>ie.classList.add("ok");ie.onerror=()=>{ie.replaceWith(Object.assign(document.createElement("div"),{className:"noimg",textContent:it.b}))}}}
   a.querySelector(".heart").onclick=e=>{e.preventDefault();e.stopPropagation();
     if(favs[it.id])delete favs[it.id];else favs[it.id]=1;store.set("favs",favs);e.currentTarget.setAttribute("aria-pressed",!!favs[it.id]);favCount();toast(favs[it.id]?"Добавлено в избранное":"Убрано из избранного")};
   return a;
@@ -604,7 +644,8 @@ addEventListener("hashchange",route);
 /* ---------- boot ---------- */
 $("q").value=F.q||"";favCount();route();apply();
 fetch("deals.json?v="+Date.now()).then(r=>r.json()).then(j=>{
-  ALL=(j.items||[]).filter(it=>it&&typeof it.p==="number"&&/^https:\/\/oskelly\.ru\/products\//.test(it.u));updated=j.updatedAt||"";
+  ALL=(j.items||[]).filter(it=>it&&typeof it.p==="number"&&/^https:\/\/(oskelly\.ru|thecultt\.com|www\.vipavenue\.ru|www\.ozon\.ru)\//.test(it.u)).map(it=>({...it,i:/^https:\/\//.test(it.i||"")?it.i:""}));updated=j.updatedAt||"";
+  $("sScanned").textContent=j.scanned?Number(j.scanned).toLocaleString("ru-RU"):"—";
   const brands=new Set(ALL.map(i=>i.b));
   $("sItems").textContent=ALL.length;$("sBrands").textContent=brands.size;
   $("sDate").textContent=updated?new Date(updated).toLocaleDateString("ru-RU",{day:"numeric",month:"short"}):"—";
