@@ -254,6 +254,7 @@ footer{border-top:1px solid var(--line);padding-block:24px;color:var(--ink-3);fo
       <a href="#shop" data-v="shop">Находки</a>
       <a href="#hunt" data-v="hunt">Охота</a>
       <a href="#platforms" data-v="platforms">Площадки</a>
+      <a href="#avito" data-v="avito">Авито</a>
       <a href="#saved" data-v="saved" aria-label="Избранное">♥<span class="cnt" id="favCnt" hidden>0</span></a>
     </nav>
   </div>
@@ -395,6 +396,30 @@ footer{border-top:1px solid var(--line);padding-block:24px;color:var(--ink-3);fo
       <div class="field"><label for="pq">Запрос</label><input id="pq" placeholder="Bottega Veneta Jodie"></div>
     </div>
     <div class="plats" id="plats"></div>
+  </div>
+</section>
+
+<!-- ========== АВИТО ========== -->
+<section data-view="avito" class="view" hidden>
+  <div class="wrap">
+    <h2 class="title">Охота на Авито</h2>
+    <p class="lead">Авито не даёт собирать объявления автоматически, поэтому здесь два инструмента, которые работают в твоём браузере. Первый — готовые поиски с потолком цены: он считается от медианы оригиналов этого бренда и типа вещи на Oskelly, The Cultt и VIP Avenue. Открой поиск и нажми на Авито «Сохранить поиск»: о новых объявлениях Авито пришлёт уведомление. Второй — кнопка-закладка, которая подсвечивает выгодное прямо в выдаче Авито.</p>
+    <div class="panel" style="max-width:none">
+      <div class="fgrid">
+        <div class="field"><label for="avRegion">Где искать</label><select id="avRegion"><option value="moskva">Москва</option><option value="sankt-peterburg">Санкт-Петербург</option><option value="rossiya">Вся Россия, с доставкой</option></select></div>
+        <div class="field"><label for="avLevel">Потолок цены</label><select id="avLevel"><option value="0.3">Ультра: до 30% медианы</option><option value="0.5" selected>Сильно: до 50% медианы</option><option value="0.7">Мягко: до 70% медианы</option></select></div>
+        <div class="field"><label for="avCat">Раздел</label><select id="avCat"><option value="all">Всё</option><option value="bags">Сумки</option><option value="outer">Верхняя одежда</option><option value="sneakers">Кроссовки</option><option value="shoes">Обувь</option><option value="clothes">Одежда</option><option value="acc">Аксессуары</option></select></div>
+        <div class="field"><label for="avBrandQ">Бренды</label><input id="avBrandQ" list="brandList" placeholder="Начни вводить: Moncler"></div>
+      </div>
+      <div class="pills" id="avBrands"></div>
+    </div>
+    <div class="list" id="avList" style="max-width:none"></div>
+    <div class="panel" style="max-width:none;margin-top:28px">
+      <div class="fhead"><h3>Подсветка выгодного в выдаче Авито</h3></div>
+      <p style="margin:0;color:var(--ink-2)">Перетащи кнопку на панель закладок браузера на компьютере. Открой любой поиск на Авито и нажми закладку: объявления дешевле рынка получат зелёную плашку с процентом, подозрительно дешёвые — жёлтую «⚠ возможна подделка», остальные станут бледнее. Закладка читает только страницу, которую ты уже открыл, и никуда ничего не отправляет. Медианы зашиты в закладку на момент её создания: обновляй её раз в неделю, перетащив заново.</p>
+      <a class="btn press" id="avBookmarklet" href="#" style="display:inline-flex;align-items:center;text-decoration:none">⚑ Охота: подсветить Авито</a>
+      <p class="small" style="margin:0;font-size:12px;color:var(--ink-3)">Разметку Авито я не мог проверить: их сайт закрыт для автоматических запросов. Если закладка ничего не подсветит, напиши, и я поправлю по скриншоту страницы.</p>
+    </div>
   </div>
 </section>
 
@@ -632,12 +657,55 @@ const PL=[
 function drawPlats(){const q=$("pq").value.trim()||F.q||"Bottega Veneta";$("plats").innerHTML=PL.map(([n,d,f])=>`<a class="plat" target="_blank" rel="noopener" href="${esc(f(q))}"><b>${esc(n)}</b><span>${esc(d)}</span><em>Искать «${esc(q)}» ↗</em></a>`).join("")}
 $("pq").addEventListener("input",drawPlats);
 
+/* ---------- avito ---------- */
+const TYPEQ=t=>t.toLowerCase().replace(/\s*[\/(].*$/,"").replace(/^(повседневн\w+|классическ\w+|низкие|высокие)\s+/,"").split(" ").slice(0,2).join(" ");
+function medTable(){ // brand -> [{t,q,c,m,n}]
+  const g={};ALL.forEach(it=>{if(it.src==="Ozon"||!it.m)return;const k=it.b+"|"+TYPEQ(it.t);(g[k]=g[k]||{b:it.b,q:TYPEQ(it.t),c:it.c,ms:[]}).ms.push(it.m)});
+  const out={};Object.values(g).forEach(x=>{const s=x.ms.sort((a,b)=>a-b);const m=s[s.length>>1];(out[x.b]=out[x.b]||[]).push({q:x.q,c:x.c,m,n:s.length})});
+  Object.values(out).forEach(a=>a.sort((x,y)=>y.n-x.n));return out}
+let AVB=store.get("avb",["Moncler","Prada","Chanel","Gucci","Loro Piana"]);
+function drawAvito(){
+  if(!ALL.length)return;
+  const T=medTable(),reg=$("avRegion").value,k=+$("avLevel").value,cat=$("avCat").value;
+  AVB=AVB.filter(b=>T[b]);store.set("avb",AVB);
+  $("avBrands").innerHTML="";AVB.forEach(b=>{const x=document.createElement("button");x.type="button";x.textContent=b+" ×";x.setAttribute("aria-pressed","true");x.onclick=()=>{AVB=AVB.filter(y=>y!==b);drawAvito()};$("avBrands").appendChild(x)});
+  const rows=[];AVB.forEach(b=>(T[b]||[]).filter(r=>cat==="all"||r.c===cat).slice(0,8).forEach(r=>rows.push({b,...r})));
+  $("avList").innerHTML=rows.length?"":'<div class="empty"><b>Добавь бренды</b>Начни вводить название в поле «Бренды».</div>';
+  rows.forEach(r=>{const cap=Math.round(r.m*k/500)*500;const q=(r.b.replace(/^'S /i,"S ")+" "+r.q).trim();
+    const url=`https://www.avito.ru/${reg}?q=${E(q)}&pmax=${cap}&s=104`;
+    const d=document.createElement("div");d.className="row";
+    d.innerHTML=`<div><div class="nm">${esc(r.b)} · ${esc(r.q)}</div><div class="sub">до ${rub(cap)} · медиана оригиналов ${rub(r.m)} · сначала новые</div></div><a class="lnk" target="_blank" rel="noopener" href="${esc(url)}">Открыть на Авито ↗</a>`;$("avList").appendChild(d)});
+  $("avBookmarklet").href=bookmarklet(T);
+}
+$("avBrandQ").addEventListener("change",e=>{const v=e.target.value.trim();const b=[...new Set(ALL.map(i=>i.b))].find(x=>x.toLowerCase()===v.toLowerCase());if(b&&!AVB.includes(b)){AVB.push(b);drawAvito()}e.target.value=""});
+["avRegion","avLevel","avCat"].forEach(id=>$(id).addEventListener("change",drawAvito));
+$("avBookmarklet").addEventListener("click",e=>{e.preventDefault();toast("Перетащи кнопку на панель закладок")});
+function bookmarklet(T){
+  const D={};Object.entries(T).forEach(([b,a])=>{D[b.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/^'s /,"s ")]=a.slice(0,12).map(r=>[r.q,r.m])});
+  const code=`(()=>{const D=${JSON.stringify(D)};const AL={"луи":"louis vuitton","lv":"louis vuitton","шанель":"chanel","гуччи":"gucci","прада":"prada","монклер":"moncler","диор":"dior","эрмес":"hermes","гермес":"hermes","баленсиага":"balenciaga","боттега":"bottega veneta","селин":"celine","фенди":"fendi","лоро пиана":"loro piana","стон айленд":"stone island","макс мара":"max mara","бербери":"burberry","канада гус":"canada goose","сен лоран":"saint laurent","ив сен лоран":"saint laurent","ysl":"saint laurent","миу миу":"miu miu","валентино":"valentino","голден гус":"golden goose"};
+const items=document.querySelectorAll('[data-marker="item"]');let n=0,g=0,w=0;
+items.forEach(el=>{n++;const t=((el.querySelector('[data-marker="item-title"],[itemprop="name"],h3')||{}).textContent||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+let p=+((el.querySelector('[itemprop="price"]')||{}).content||0);if(!p){const m=(el.textContent.match(/(\\d[\\d\\s\\u00a0]{2,})\\s*₽/)||[])[1];p=m?+m.replace(/\\D/g,""):0}
+if(!p)return;let br=Object.keys(D).find(b=>t.includes(b));if(!br){const a=Object.keys(AL).find(k=>t.includes(k));if(a)br=AL[a]}
+const tag=document.createElement("div");tag.style.cssText="position:relative;z-index:5;margin:4px 0;padding:4px 8px;border-radius:4px;font:600 13px/1.3 system-ui;display:inline-block";
+if(!br||!D[br]){el.style.opacity=".45";return}
+const rows=D[br];const r=rows.find(x=>x[0].split(" ").every(wd=>t.includes(wd.slice(0,5))))||rows.find(x=>t.includes(x[0].split(" ")[0].slice(0,5)));
+if(!r){el.style.opacity=".45";return}
+const ratio=p/r[1];const pct=Math.round((1-ratio)*100);
+if(ratio<0.2){w++;tag.textContent="⚠ на "+pct+"% ниже рынка — возможна подделка";tag.style.background="#F2B53A";tag.style.color="#1E1503"}
+else if(ratio<=0.6){g++;tag.textContent="на "+pct+"% ниже рынка (медиана "+r[1].toLocaleString("ru-RU")+" ₽)";tag.style.background="#1D6B45";tag.style.color="#fff";el.style.outline="3px solid #1D6B45";el.style.outlineOffset="2px"}
+else{el.style.opacity=".45";return}
+el.prepend(tag)});
+alert("Охота за скидками: объявлений "+n+", выгодных "+g+", подозрительно дешёвых "+w+(n?"":". Не нашёл объявлений на странице — пришли скриншот, поправлю."))})()`;
+  return "javascript:"+encodeURIComponent(code);
+}
+
 /* ---------- routing ---------- */
-const VIEWS=["shop","hunt","platforms","saved"];
+const VIEWS=["shop","hunt","platforms","avito","saved"];
 function route(){const v=(location.hash||"#shop").slice(1);const ok=VIEWS.includes(v)?v:"shop";
   document.querySelectorAll("[data-view]").forEach(s=>s.hidden=s.dataset.view!==ok);
   document.querySelectorAll(".nav a").forEach(a=>a.dataset.v===ok?a.setAttribute("aria-current","page"):a.removeAttribute("aria-current"));
-  if(ok==="saved")drawFavs();if(ok==="hunt")loadHunts();if(ok==="platforms"){if(!$("pq").value&&F.q)$("pq").value=F.q;drawPlats()}
+  if(ok==="saved")drawFavs();if(ok==="avito")drawAvito();if(ok==="hunt")loadHunts();if(ok==="platforms"){if(!$("pq").value&&F.q)$("pq").value=F.q;drawPlats()}
   if(v!==ok||ok!=="shop")scrollTo(0,0)}
 addEventListener("hashchange",route);
 
@@ -651,7 +719,7 @@ fetch("deals.json?v="+Date.now()).then(r=>r.json()).then(j=>{
   $("sDate").textContent=updated?new Date(updated).toLocaleDateString("ru-RU",{day:"numeric",month:"short"}):"—";
   $("brandList").innerHTML=[...brands].sort().map(b=>`<option value="${esc(b)}">`).join("");
   F.brands=F.brands.filter(b=>brands.has(b));
-  apply();if(location.hash==="#saved")drawFavs();
+  apply();if(location.hash==="#saved")drawFavs();if(location.hash==="#avito")drawAvito();
 }).catch(()=>{$("grid").innerHTML='<div class="empty"><b>Находки не загрузились</b>Обнови страницу через минуту.</div>'});
 </script>
 </body>
